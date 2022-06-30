@@ -1,0 +1,77 @@
+[![Foo](https://pic.leetcode-cn.com/1642401540-VfPxoS-file_1642401536561)](https://gitee.com/wfnuser/img/raw/master/perturbation.png) [![Foo](https://pic.leetcode-cn.com/1641890108-zTFrPQ-file_1641890104117)](https://github.com/wfnuser) [![Foo](https://pic.leetcode-cn.com/1641890107-TJrViW-file_1641890104103)](https://gitee.com/wfnuser/img/raw/master/mp.jpeg) [![Foo](https://pic.leetcode-cn.com/1641890108-KiCpre-file_1641890104115)](https://www.zhihu.com/people/qin-hao-37)
+
+大家好，我是微扰理论；目前正在连载国服每日一题题解。想加入 emqx 和微扰酱一起工作可以直接联系我哦👆～
+
+### 解题思路
+
+今天打了周赛，题解更新的又晚了一些。
+这道题和[20.有效的括号](https://leetcode-cn.com/problems/valid-parentheses/)其实很像，但里面多了一个星号，让这个题目不再这么直观。
+我们很自然的会仍然用**两个栈**记录目前为止不能匹配的字符，也就是`*`和`(`，每次出现右括号我们就应该去两个栈匹配可以匹配的左括号。
+
+而`*`可以作为任何括号，也可以作为空字符串，所以我们应该优先用左括号匹配，所以我们出栈的策略如下：
+
+1. 遇到左括号，直接进栈，记录括号的位置。
+2. 遇到星号，直接进栈，记录星号的位置。
+3. 遇到右括号：
+
+- a: 左括号栈里有元素，直接出栈。
+- b: 左括号栈里无元素，*栈里有元素，直接出栈。无元素的话就已经匹配失败了。
+
+如果遍历完数组的话，我们可能会发现左括号栈里还有结余元素。如果是20题的情况，已经失败了。但现在我们可能还有一些星号可以作为右括号用，所以我们进行下面的匹配操作：
+对左括号栈逐一出栈，然后去看此时星号栈的栈顶，如果栈顶元素的位置大于左括号栈顶元素的位置，说明星号在括号的右侧，可以匹配。否则不可。
+
+翻译成代码如下：
+
+### 代码
+
+* cpp
+
+```cpp
+class Solution {
+public:
+    bool checkValidString(string s) {
+        stack<int> star;
+        stack<int> left;
+        
+        for (int i = 0; i < s.size(); i++) {
+            char c = s[i];
+            if (c == '(') {
+                left.push(i);
+            }
+            if (c == '*') {
+                star.push(i);
+            }
+            if (c == ')') {
+                if (!left.empty()) {
+                    left.pop();
+                } else if (!star.empty()) {
+                    star.pop();
+                } else {
+                    return false;
+                }
+            }
+        }
+
+        while (!left.empty()) {
+            int posL = left.top();
+            if (star.empty()) return false;
+            int posS = star.top();
+            if (posS > posL) {
+                star.pop();
+                left.pop();
+            } else {
+                return false;
+            }
+        }
+
+        return true;
+    }
+};
+```
+
+### 关于我
+
+18年毕业于上海交通大学，一个在阿里、字节、腾讯都工作过的工程师，有丰富的面试经验，业余时间也是【悖论13】剧本杀的老板。实在卷不动了，目前(2021.8)在emqx从事存储研发，希望在今年多多输出。
+想了解我和我的公司或者一起刷题的可以 +v ： constant_variation
+
+最后，如果对你有帮助，**可以点个赞支持一下我哦** 也欢迎在leetcode上[关注我](https://leetcode-cn.com/u/wfnuser/)。

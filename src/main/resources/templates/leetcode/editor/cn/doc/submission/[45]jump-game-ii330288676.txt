@@ -1,0 +1,20 @@
+class Solution {
+    public int jump(int[] nums) {
+        int max=nums[0],n=nums.length,cnt=1,l=0;
+        while (max<n-1){
+            cnt++;
+            int t=max;
+            for (int i = l+1; i <=t ; i++) {
+                max=Math.max(i+nums[i],max);
+            }
+            l=t;
+        }
+        return cnt;
+    }
+}
+
+//total_testcases:106
+//total_correct:107
+//input_formatted:[0]
+//expected_output:0
+//code_output:1

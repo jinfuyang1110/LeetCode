@@ -1,0 +1,446 @@
+## 模拟
+
+一个简单的想法是根据题意进行模拟，检查 $[left, right]$ 中的每个整数，如果检查过程中发现某个整数没被 $ranges$ 中的闭区间所覆盖，那么直接返回 `False`，所有数值通过检查则返回 `True`。
+
+代码：
+
+* []
+
+```Java
+class Solution {
+    public boolean isCovered(int[][] rs, int l, int r) {
+        for (int i = l; i <= r; i++) {
+            boolean ok = false;
+            for (int[] cur : rs) {
+                int a = cur[0], b = cur[1];
+                if (a <= i && i <= b) {
+                    ok = true;
+                    break;
+                }
+            }
+            if (!ok) return false;
+        }
+        return true;
+    }
+}
+```
+
+* 时间复杂度：令 $[left, right]$ 之间整数数量为 $n$，$ranges$ 长度为 $m$。整体复杂度为 $O(n * m)$
+* 空间复杂度：$O(1)$
+
+---
+
+## 树状数组
+
+**针对此题，可以有一个很有意思的拓展，将本题难度提升到【中等】甚至是【困难】。**
+
+将查询 $[left, right]$ 修改为「四元查询数组」$querys$，每个 $querys[i]$ 包含四个指标 $(a,b,l,r)$：代表询问 $[l, r]$ 中的每个数是否在 $range$ 中 $[a, b]$ 的闭区间所覆盖过。
+
+**如果进行这样的拓展的话，那么我们需要使用「持久化树状数组」或者「主席树」来配合「容斥原理」来做。**
+
+基本思想都是使用 $range[0,b]$ 的计数情况减去 $range[0, a-1]$ 的计数情况来得出 $[a, b]$ 的计数情况。
+
+回到本题，由于数据范围很小，只有 $50$，我们可以使用「树状数组」进行求解：
+
+* `void add(int x, int u)`：对于数值 $x$ 出现次数进行 $+u$ 操作；
+* `int query(int x)`：查询某个满足 $<= x$ 的数值的个数。
+
+那么显然，如果我们需要查询一个数值 $x$ 是否出现过，可以通过查询 $cnt = query(x) - query(x - 1)$ 来得知。
+
+**代码（感谢 [@Benhao](/u/qubenhao/) 和 [@answerer](/u/answerer/) 同学提供的其他语言代码）：**
+
+* []
+
+```Java
+class Solution {
+    int n = 55;
+    int[] tr = new int[n];
+    int lowbit(int x) {
+        return x & -x;
+    }
+    void add(int x, int u) {
+        for (int i = x; i <= n; i += lowbit(i)) tr[i] += u;
+    }
+    int query(int x) {
+        int ans = 0;
+        for (int i = x; i > 0; i -= lowbit(i)) ans += tr[i];
+        return ans;
+    }
+    public boolean isCovered(int[][] rs, int l, int r) {
+        for (int[] cur : rs) {
+            int a = cur[0], b = cur[1];
+            for (int i = a; i <= b; i++) {
+                add(i, 1);
+            }
+        }
+        for (int i = l; i <= r; i++) {
+            int cnt = query(i) - query(i - 1);
+            if (cnt == 0) return false;
+        }
+        return true;
+    }
+}
+```
+
+* []
+
+```C++
+class Solution {
+public:
+    int n = 55;
+    static int tr[55];
+    int lowbit(int x) {
+        return x & -x;
+    }
+    void add(int x, int u) {
+        for (int i = x; i <= n; i += lowbit(i)) tr[i] += u;
+    }
+    int query(int x) {
+        int ans = 0;
+        for (int i = x; i > 0; i -= lowbit(i)) ans += tr[i];
+        return ans;
+    }
+    bool isCovered(vector<vector<int>> & rs, int l, int r) {
+        memset(tr, 0, sizeof tr);
+        for (auto &  cur : rs) {
+            int a = cur[0], b = cur[1];
+            for (int i = a; i <= b; i++) {
+                add(i, 1);
+            }
+        }
+        for (int i = l; i <= r; i++) {
+            int cnt = query(i) - query(i - 1);
+            if (cnt == 0) return false;
+        }
+        return true;
+    }
+};
+
+int Solution::tr[55] = {0,};
+```
+
+* Python 3 []
+
+```Python 3 []
+class Solution:
+    def isCovered(self, ranges: List[List[int]], left: int, right: int) -> bool:
+        n = 55
+        tr = [0] * n
+
+        def lowbit(x):
+            return x & -x
+
+        def add(x, u):
+            i = x
+            while i <= n:
+                tr[i] += u
+                i += lowbit(i)
+        
+        def query(x):
+            ans = 0
+            i = x
+            while i > 0:
+                ans += tr[i]
+                i -= lowbit(i)
+            return ans
+        
+        for a,b in ranges:
+            for i in range(a, b+1):
+                add(i, 1)
+        
+        for i in range(left, right+1):
+            cnt = query(i) - query(i-1)
+            if not cnt:
+                return False
+        return True
+```
+
+* 时间复杂度：令 $[left, right]$ 之间整数数量为 $n$，$\sum_{i = 0}^{range.legth - 1}ranges[i].length$ 为 $sum$，常数 $C$ 固定为 $55$。建树复杂度为 $O(sum\log C)$，查询查询复杂度为 $O(n\log{C})$。整体复杂度为 $O(sum\log{C} + n\log{C})$
+* 空间复杂度：$O(C)$
+
+---
+
+## 树状数组（去重优化）
+
+在朴素的「树状数组」解法中，我们无法直接查询 $[l, r]$ 区间中被覆盖过的个数的根本原因是「某个值可能会被重复添加到树状数组中」。
+
+因此，一种更加优秀的做法：**在往树状数组中添数的时候进行去重，然后通过 $cnt = query(r) - query(l - 1)$ 直接得出 $[l, r]$ 范围内有多少个数被添加过。**
+
+这样的 `Set` 去重操作可以使得我们查询的复杂度从 $O(n\log{C})$ 下降到 $O(\log{C})$。
+
+> 由于数值范围很小，自然也能够使用数组来代替 `Set` 进行标记（见 P2）
+
+代码：
+
+* []
+
+```Java
+class Solution {
+    int n = 55;
+    int[] tr = new int[n];
+    int lowbit(int x) {
+        return x & -x;
+    }
+    void add(int x, int u) {
+        for (int i = x; i <= n; i += lowbit(i)) tr[i] += u;
+    }
+    int query(int x) {
+        int ans = 0;
+        for (int i = x; i > 0; i -= lowbit(i)) ans += tr[i];
+        return ans;
+    }
+    public boolean isCovered(int[][] rs, int l, int r) {
+        Set<Integer> set = new HashSet<>();
+        for (int[] cur : rs) {
+            int a = cur[0], b = cur[1];
+            for (int i = a; i <= b; i++) {
+                if (!set.contains(i)) {
+                    add(i, 1);
+                    set.add(i);
+                }
+            }
+        }
+        int tot = r - l + 1, cnt = query(r) - query(l - 1);
+        return tot == cnt;
+    }
+}
+```
+
+* []
+
+```Java
+class Solution {
+    int n = 55;
+    int[] tr = new int[n];
+    boolean[] vis = new boolean[n];
+    int lowbit(int x) {
+        return x & -x;
+    }
+    void add(int x, int u) {
+        for (int i = x; i <= n; i += lowbit(i)) tr[i] += u;
+    }
+    int query(int x) {
+        int ans = 0;
+        for (int i = x; i > 0; i -= lowbit(i)) ans += tr[i];
+        return ans;
+    }
+    public boolean isCovered(int[][] rs, int l, int r) {
+        for (int[] cur : rs) {
+            int a = cur[0], b = cur[1];
+            for (int i = a; i <= b; i++) {
+                if (!vis[i]) {
+                    add(i, 1);
+                    vis[i] = true;
+                }
+            }
+        }
+        int tot = r - l + 1, cnt = query(r) - query(l - 1);
+        return tot == cnt;
+    }
+}
+```
+
+* 时间复杂度：令 $[left, right]$ 之间整数数量为 $n$，$\sum_{i = 0}^{range.legth - 1}ranges[i].length$ 为 $sum$，常数 $C$ 固定为 $55$。建树复杂度为 $O(sum\log C)$，查询查询复杂度为 $O(\log{C})$。整体复杂度为 $O(sum\log{C} + \log{C})$
+* 空间复杂度：$O(C + \sum_{i = 0}^{range.legth - 1}ranges[i].length)$
+
+---
+
+## 线段树（不含“懒标记”）
+
+更加进阶的做法是使用「线段树」来做，与「树状数组（优化）」解法一样，线段树配合持久化也可以用于求解「在线」问题。
+
+**与主要解决「单点修改 & 区间查询」的树状数组不同，线段树能够解决绝大多数「区间修改（区间修改/单点修改）& 区间查询」问题。**
+
+对于本题，由于数据范围只有 $55$，因此我们可以使用与「树状数组（优化）」解法相同的思路，实现一个不包含“懒标记”的线段树来做（仅支持单点修改 & 区间查询）。
+
+**代码（感谢 [@Benhao](/u/qubenhao/) 和 [@answerer](/u/answerer/) 同学提供的其他语言代码）：**
+
+* []
+
+```Java
+class Solution {
+    // 代表 [l, r] 区间有 cnt 个数被覆盖
+    class Node {
+        int l, r, cnt;
+        Node (int _l, int _r, int _cnt) {
+            l = _l; r = _r; cnt = _cnt;
+        }
+    }
+    int N = 55;
+    Node[] tr = new Node[N * 4];
+    void pushup(int u) {
+        tr[u].cnt = tr[u << 1].cnt + tr[u << 1 | 1].cnt;
+    }
+    void build(int u, int l, int r) {
+        if (l == r) {
+            tr[u] = new Node(l, r, 0);
+        } else {
+            tr[u] = new Node(l, r, 0);
+            int mid = l + r >> 1;
+            build(u << 1, l, mid);
+            build(u << 1 | 1, mid + 1, r);
+            pushup(u);
+        }
+    }
+    // 从 tr 数组的下标 u 开始，在数值 x 的位置进行标记
+    void update(int u, int x) {
+        if (tr[u].l == x && tr[u].r == x) {
+            tr[u].cnt = 1;
+        } else {
+            int mid = tr[u].l + tr[u].r >> 1;
+            if (x <= mid) update(u << 1, x);
+            else update(u << 1 | 1, x);
+            pushup(u);
+        }
+    }
+    // 从 tr 数组的下标 u 开始，查询 [l,r] 范围内有多少个数值被标记
+    int query(int u, int l, int r) {
+        if (l <= tr[u].l && tr[u].r <= r) return tr[u].cnt;
+        int mid = tr[u].l + tr[u].r >> 1;
+        int ans = 0;
+        if (l <= mid) ans += query(u << 1, l, r);
+        if (r > mid) ans += query(u << 1 | 1, l, r);
+        return ans;
+    }
+    public boolean isCovered(int[][] rs, int l, int r) {
+        build(1, 1, N);
+        for (int[] cur : rs) {
+            int a = cur[0], b = cur[1];
+            for (int i = a; i <= b; i++) {
+                update(1, i);
+            }
+        }
+        int tot = r - l + 1 , cnt = query(1, l, r);
+        return tot == cnt;
+    }
+}
+```
+
+* []
+
+```C++
+const int N = 55;
+class Solution {
+public:
+struct Node {
+        int l, r, cnt;
+    };
+    Node tr [N * 4];
+    void pushup(int u) {
+        tr[u].cnt = tr[u << 1].cnt + tr[u << 1 | 1].cnt;
+    }
+    void build(int u, int l, int r) {
+        tr[u].l = l, tr[u].r = r, tr[u].cnt = 0;
+        if(l != r)
+        {
+            int mid = (l + r) >> 1;
+            build(u << 1, l, mid);
+            build(u << 1 | 1, mid + 1, r);
+            pushup(u);
+        }
+    }
+    // 从 tr 数组的下标 u 开始，在数值 x 的位置进行标记
+    void update(int u, int x) {
+        if (tr[u].l == x && tr[u].r == x) {
+            tr[u].cnt = 1;
+        } else {
+            int mid = (tr[u].l + tr[u].r) >> 1;
+            if (x <= mid) update(u << 1, x);
+            else update(u << 1 | 1, x);
+            pushup(u);
+        }
+    }
+    // 从 tr 数组的下标 u 开始，查询 [l,r] 范围内有多少个数值被标记
+    int query(int u, int l, int r) {
+        if (l <= tr[u].l && tr[u].r <= r) return tr[u].cnt;
+        int mid = (tr[u].l + tr[u].r) >> 1;
+        int ans = 0;
+        if (l <= mid) ans += query(u << 1, l, r);
+        if (r > mid) ans += query(u << 1 | 1, l, r);
+        return ans;
+    }
+    bool isCovered(vector <vector <int>> & rs, int l, int r) {
+        build(1, 1, N);
+        for (auto &  cur : rs) {
+            int a = cur[0], b = cur[1];
+            for (int i = a; i <= b; i++) {
+                update(1, i);
+            }
+        }
+        int tot = r - l + 1 , cnt = query(1, l, r);
+        return tot == cnt;
+    }
+};
+```
+
+* []
+
+```Python3
+class Solution:
+    def isCovered(self, ranges: List[List[int]], l: int, r: int) -> bool:
+        def pushup(u):
+            tr[u].cnt = tr[u << 1].cnt + tr[u << 1 | 1].cnt
+        
+        def build(u, l, r):
+            tr[u] = Node(l, r, 0)
+            if l != r:
+                tr[u] = Node(l, r, 0)
+                mid = l + r >> 1
+                build(u << 1, l, mid)
+                build(u << 1 | 1, mid + 1, r)
+                pushup(u)
+            
+        # 从 tr 数组的下标 u 开始，在数值 x 的位置进行标记
+        def update(u, x):
+            if tr[u].l == x and tr[u].r == x:
+                tr[u].cnt = 1
+            else:
+                mid = tr[u].l + tr[u].r >> 1
+                if x <= mid:
+                    update(u << 1, x)
+                else:
+                    update(u << 1 | 1, x)
+                pushup(u)
+
+        # 从 tr 数组的下标 u 开始，查询 [l,r] 范围内有多少个数值被标记
+        def query(u, l, r):
+            if l <= tr[u].l and tr[u].r <= r:
+                return tr[u].cnt
+            mid = tr[u].l + tr[u].r >> 1
+            ans = 0
+            if l <= mid:
+                ans += query(u << 1, l, r)
+            if r > mid:
+                ans += query(u << 1 | 1, l, r)
+            return ans
+
+        N = 55
+        tr = [None] * N * 4
+        build(1, 1, N)
+        for a,b in ranges:
+            for i in range(a, b+1):
+                update(1, i)
+        tot = r - l + 1
+        cnt = query(1, l, r)
+        return tot == cnt
+    
+
+class Node:
+    def __init__(self, l, r, cnt):
+        self.l = l
+        self.r = r
+        self.cnt = cnt
+```
+
+* 时间复杂度：令 $[left, right]$ 之间整数数量为 $n$，$\sum_{i = 0}^{range.legth - 1}ranges[i].length$ 为 $sum$，常数 $C$ 固定为 $55$。建树复杂度为 $O(sum\log C)$，查询查询复杂度为 $O(\log{C})$。整体复杂度为 $O(sum\log{C} + \log{C})$
+* 空间复杂度：$O(C * 4)$
+
+---
+
+## 最后
+
+**如果有帮助到你，请给题解点个赞和收藏，让更多的人看到 ~ ("▔□▔)/**
+
+也欢迎你 [关注我](https://oscimg.oschina.net/oscnet/up-19688dc1af05cf8bdea43b2a863038ab9e5.png) 和 加入我们的[「组队打卡」](https://leetcode-cn.com/u/ac_oier/)小群 ，提供写「证明」&「思路」的高质量题解。
+
+所有题解已经加入 [刷题指南](https://github.com/SharingSource/LogicStack-LeetCode/wiki)，欢迎 star 哦 ~

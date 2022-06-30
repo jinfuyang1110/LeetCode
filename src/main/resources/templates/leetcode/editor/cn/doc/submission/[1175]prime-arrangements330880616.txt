@@ -1,0 +1,27 @@
+class Solution {
+
+    public int numPrimeArrangements(int n) {
+        long cnt=1,count=0;
+        int mod=(int)1e9+7;
+       A: for (int i = 3; i <= n; i++) {
+            for (int j = 2; j <i/2; j++) {
+                if (i%j==0) continue A;
+            }
+            count++;
+        }
+        long a=n-count;
+        for (int i = 2; i <=a; i++) {
+            cnt=(i*cnt)%mod;
+        }
+        for (int i = 2; i <=count; i++) {
+            cnt=(i*cnt)%mod;
+        }
+        return  (int) cnt;
+    }
+}
+
+//total_testcases:100
+//total_correct:99
+//input_formatted:2
+//expected_output:1
+//code_output:2

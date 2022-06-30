@@ -1,0 +1,26 @@
+class Solution {
+    int mod = 1000000000 + 7;
+
+    public int findPaths(int m, int n, int maxMove, int startRow, int startColumn) {
+        long[][][] dp = new long[m][n][maxMove + 1];
+        for (int k = 0; k <= maxMove; k++) {
+            for (int i = 0; i < m; i++) {
+                for (int j = 0; j < n; j++) {
+                    if (k == 0) dp[i][j][k] = 0;
+                    else {
+                        long a = i + 1 >= m ? 1 : dp[i + 1][j][k - 1];
+                        long b = i - 1 < 0 ? 1 : dp[i - 1][j][k - 1];
+                        long c = j + 1 >= n ? 1 : dp[i][j + 1][k - 1];
+                        long d = j - 1 < 0 ? 1 : dp[i][j - 1][k - 1];
+                        dp[i][j][k] = ((a + b) % mod + (c + d) % mod) % mod;
+                    }
+                }
+            }
+        }
+        return (int) dp[startRow][startColumn][maxMove];
+    }
+
+}
+
+//runtime:9 ms
+//memory:41 MB

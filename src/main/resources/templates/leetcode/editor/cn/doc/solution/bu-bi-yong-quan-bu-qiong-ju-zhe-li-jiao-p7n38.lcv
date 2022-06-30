@@ -1,0 +1,126 @@
+![2020121501.PNG](https://pic.leetcode-cn.com/1608039471-isOHMR-2020121501.PNG)
+
+### 解题思路
+
+对于一个24小时格式的时间 HH:MM,
+这里要明确两点:
+1) HH值的范围为[0,23], 即0<=HH<=23;
+2) MM值的范围为[0,59], 即0<=MM<=59;
+   所以, 明确了HH和MM的范围, 这里就用不着全排列了找所有的可能组合了, 只需要在范围内找HH和MM的值即可。
+   步骤如下:
+3) 对arr数组进行排序;
+4) 用left和right双指针从左往右遍历数组arr:
+   --(1) 以左指针left指向的值arr[left]为十位数, 右指针right指向的值arr[right]为个位数进行组合, 寻找小于等于23, 并使HH可能最大的值;
+5) 遍历一遍数组arr, 统计大于等于6的数字的个数记为maxThanSix;
+6) 若maxThanSix小于2, 则:
+   --(1) 以右指针right指向的值arr[right]为十位数, 左指针left指向的值arr[left]为个位数进行组合, 寻找小于等于23, 并使HH可能最大的值;
+7) 若没有找到一个组合使0<=HH<=23, 则直接返回空字符串;
+8) 将剩下两个没有使用的数字进行组合, 寻找小于等于59, 并使MM可能最大的组合;
+9) 若没有找到一个组合使0<=MM<=59, 则直接返回空字符串;
+10) 将HH和MM拼接成字符串, 这里需要注意, 当HH和MM不足两位数时, 前面用0补足.
+11) 最后返回, 24小时格式的时间字符串.
+    (走过路过, 不要错过, 看一看, 赞一赞!!!)
+
+### 代码
+
+* java
+
+```java
+class Solution {
+    public String largestTimeFromDigits(int[] arr) {
+        Arrays.sort(arr);
+        int left = 0;
+        int right = arr.length-1;
+        int indexL = -1;
+        int indexR = -1;
+        int hour = -1;
+        int maxThanSix = 0;
+        //从左往右寻找时钟的可能最大值
+        while(left<right){
+            int temp = 10*arr[left]+arr[right];
+            if(temp<24){
+                if(temp>hour){
+                    hour = temp;
+                    indexL = left;
+                    indexR = right;
+                }
+                left++;
+                
+                if(arr[left]>=6){
+                    maxThanSix++;
+                }
+            }else {
+                if(arr[right]>=6){
+                    maxThanSix++;
+                }
+                right--;
+            }
+        }
+
+        if(maxThanSix<2){
+            //当比6大的数字小于2个时, 从右往左遍历, 寻找时钟的可能最大值
+            left = 0;
+            right = arr.length-1;
+            while(left<right){
+                int temp = arr[left]+10*arr[right];
+                if(temp<24){
+                    if(temp>hour){
+                        hour = temp;
+                        indexL = left;
+                        indexR = right;
+                    }
+                    left++;
+                }else {
+                    right--;
+                }
+            }
+        }
+        if(indexL==-1||indexR==-1){//如果没有找到合理的时钟, 直接返回空字符串
+            return "";
+        }
+
+        int num1 = -1;
+        int num2 = -1;
+        for(int i=0;i<arr.length;i++){//将剩下的两个未使用的值找出来
+            if(i!=indexL&&i!=indexR){
+                if(num1==-1){
+                    num1 = arr[i];
+                }else {
+                    num2 = arr[i];
+                }
+            }
+        }
+        //将未使用的两个值num1和num2进行组合, 再从中找出小于60, 并且尽可能大的值作为分钟的值
+        int temp1 = num2*10+num1;//组合1
+        int temp2 = num1*10+num2;//组合2
+        int minute = -1;
+        if(temp1<60&&temp1>minute){
+            minute = temp1;
+        }
+        if(temp2<60&&temp2>minute){
+            minute = temp2;
+        }
+
+        if(minute==-1){//如果没有找到合理的分钟, 直接返回空字符串
+            return "";
+        }
+        //将时钟和分钟进行拼接, 注意这里不满两位数时, 要在前面补0
+        StringBuilder output = new StringBuilder();
+        if(hour<10){
+            output.append("0");
+            output.append(hour);
+        }else {
+            output.append(hour);
+        }
+        output.append(":");
+        if(minute<10){
+            output.append("0");
+            output.append(minute);
+        }else {
+            output.append(minute);
+        }
+        return output.toString();
+    }
+}
+```
+

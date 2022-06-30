@@ -1,0 +1,30 @@
+class Solution {
+    public List<Integer> findSubstring(String s, String[] words) {
+        int n=words.length,m=words[0].length(),l=s.length();
+        List<Integer> res=new ArrayList<>();
+        Map<String,Integer> map =new HashMap<>();
+        for (String word : words) {
+            map.put(word,map.getOrDefault(word,0)+1);
+        }
+        Map<String,Integer> cur =new HashMap<>();
+        for (int i = 0,j=0; i+n*m <=l; i+=m) {
+            while (j<l&&j-i+1<=n*m){
+                String sub=s.substring(j,j+m);
+                cur.put(sub,cur.getOrDefault(sub,0)+1);
+                j+=m;
+            }
+            if (cur.equals(map)) res.add(i);
+            String per=s.substring(i,i+m);
+            if (cur.get(per)==1) cur.remove(per);
+            else cur.put(per,cur.get(per)-1);
+        }
+        return res;
+    }
+}
+
+//total_testcases:177
+//total_correct:82
+//input_formatted:"lingmindraboofooowingdingbarrwingmonkeypoundcake"
+["fooo","barr","wing","ding","wing"]
+//expected_output:[13]
+//code_output:[]

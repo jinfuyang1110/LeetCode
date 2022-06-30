@@ -1,0 +1,27 @@
+class Solution {
+    long[][][] dp;
+    boolean[][][] isOk;
+    int mod=1000000000+7;
+
+    public int findPaths(int m, int n, int maxMove, int startRow, int startColumn) {
+        dp=new long[m][n][maxMove+1];
+        isOk=new boolean[m][n][maxMove+1];
+        dfs(m,n,maxMove,startRow,startColumn);
+        return (int) dp[startRow][startColumn][maxMove];
+    }
+
+    long dfs(int m, int n, int maxMove, int r, int c) {
+        if (r >= m || r < 0 || c >= n || c < 0) return 1;
+        if (isOk[r][c][maxMove]||maxMove==0) return dp[r][c][maxMove];
+        long a=dfs(m, n, maxMove - 1, r - 1, c)%mod;
+        long b=dfs(m, n, maxMove - 1, r + 1, c)%mod;
+        long e=dfs(m, n, maxMove - 1, r, c - 1)%mod;
+        long d=dfs(m, n, maxMove - 1, r, c + 1)%mod;
+        dp[r][c][maxMove] = ((dp[r][c][maxMove]+(a+b)%mod)%mod+(e+d)%mod)%mod;
+        isOk[r][c][maxMove]=true;
+        return dp[r][c][maxMove];
+    }
+}
+
+//runtime:4 ms
+//memory:41.1 MB
