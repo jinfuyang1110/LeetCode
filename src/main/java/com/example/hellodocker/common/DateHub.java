@@ -26,11 +26,11 @@ import static java.lang.Thread.sleep;
  */
 public class DateHub {
     // Endpoint以Region: 华东1为例，其他Region请按实际情况填写
-    String endpoint = "http://dh-cn-hangzhou.aliyuncs.com";
-    String accessId = "LTAI5tHDTB11FvaXBKBrJkK6";
-    String accessKey = "Nz8qLauXjxNToyt0lkoh24pyi8VZld";
-    String projectName = "deamo1015";
-    String topicName = "student";
+    String endpoint = "";
+    String accessId = "";
+    String accessKey = "";
+    String projectName = "";
+    String topicName = "";
 
     // 创建DataHubClient实例
     public DatahubClient getDatahubClient() {
