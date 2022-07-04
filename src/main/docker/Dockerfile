@@ -14,7 +14,7 @@ VOLUME /tmp
 ADD hellodocker-0.0.1-SNAPSHOT.jar app.jar
 
 #暴露8080端口，这里是
-EXPOSE 8080
+EXPOSE 8096
 
 #RUN bash -c 'touch /app.jar'
 

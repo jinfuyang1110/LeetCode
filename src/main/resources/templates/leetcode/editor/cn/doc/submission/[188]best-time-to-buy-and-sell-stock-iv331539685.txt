@@ -1,0 +1,22 @@
+class Solution {
+    public int maxProfit(int k, int[] prices) {
+        int n = prices.length;
+        int[][][] dp = new int[n][2][k + 1];
+        Arrays.fill(dp[0][1], -prices[0]);
+        for (int i = 1; i < n; i++) {
+            for (int p = 1; p <= k; p++) {
+                dp[i][0][p]=Math.max(dp[i-1][0][p],dp[i-1][1][p-1]+prices[i]);
+            }
+            for (int p = 0; p <k; p++) {
+                dp[i][1][p]=Math.max(dp[i-1][1][p],dp[i-1][0][p]-prices[i]);
+            }
+        }
+        return dp[n - 1][0][k];
+    }
+}
+
+//runtime_error:java.lang.ArrayIndexOutOfBoundsException: Index 0 out of bounds for length 0
+  at line 5, Solution.maxProfit
+  at line 54, __DriverSolution__.__helper__
+  at line 87, __Driver__.main
+//last_testcase:2 []

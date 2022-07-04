@@ -1,10 +1,12 @@
 package com.example.hellodocker;
 
 
+import com.alibaba.fastjson.JSONObject;
 import com.aliyun.datahub.client.http.common.HttpRequest;
 import com.example.hellodocker.TreeNode.Node;
 import com.example.hellodocker.TreeNode.TreeNode;
 
+import com.example.hellodocker.utils.HttpUtil;
 import org.junit.Test;
 
 import java.text.DateFormat;
@@ -3003,55 +3005,60 @@ public class LeetCodeTest {
         }
         return dp[0];
     }
+
     public int minMoves2(int[] nums) {
-        int n=nums.length,min=Integer.MAX_VALUE;
+        int n = nums.length, min = Integer.MAX_VALUE;
         Arrays.sort(nums);
-        int[]p=new int[n];
-        int[]b=new int[n];
+        int[] p = new int[n];
+        int[] b = new int[n];
         for (int i = 1; i < n; i++) {
-            p[i]=p[i-1]+nums[i-1];
-            b[n-1-i]=b[n-i]+nums[n-i];
+            p[i] = p[i - 1] + nums[i - 1];
+            b[n - 1 - i] = b[n - i] + nums[n - i];
         }
         for (int i = 0; i < n; i++) {
-            min=Math.min(min,nums[i]*(2*i-n+1)-p[0]+b[0]);
+            min = Math.min(min, nums[i] * (2 * i - n + 1) - p[0] + b[0]);
         }
         return min;
     }
+
     public List<String> removeAnagrams(String[] words) {
-        List<String> list =new ArrayList<>();
-        int n=words.length;
+        List<String> list = new ArrayList<>();
+        int n = words.length;
         list.add(words[0]);
         for (int i = 1; i < n; i++) {
-            if (!ok(list.get(list.size()-1),words[i])){
+            if (!ok(list.get(list.size() - 1), words[i])) {
                 list.add(words[i]);
             }
         }
         return list;
     }
-    public boolean ok(String a,String b){
-        if(a.length()!=b.length()) return false;
-        int[]ans=new int[26];
+
+    public boolean ok(String a, String b) {
+        if (a.length() != b.length()) return false;
+        int[] ans = new int[26];
         for (int i = 0; i < a.length(); i++) {
-            ans[a.charAt(i)-'a']--;
-            ans[b.charAt(i)-'a']++;
+            ans[a.charAt(i) - 'a']--;
+            ans[b.charAt(i) - 'a']++;
         }
-        return Arrays.stream(ans).sum()==0;
+        return Arrays.stream(ans).sum() == 0;
     }
+
     public int[] xorQueries(int[] arr, int[][] queries) {
-        int n=arr.length,m=queries.length;
-        int[]res=new int[n+1];
-        int[]ans=new int[m];
+        int n = arr.length, m = queries.length;
+        int[] res = new int[n + 1];
+        int[] ans = new int[m];
         for (int i = 1; i <= n; i++) {
-            res[i]=res[i-1]^arr[i-1];
+            res[i] = res[i - 1] ^ arr[i - 1];
         }
         for (int i = 0; i < m; i++) {
-            ans[i]=res[queries[i][1]+1]^res[queries[i][0]];
+            ans[i] = res[queries[i][1] + 1] ^ res[queries[i][0]];
         }
         return ans;
     }
+
     @Test
     public void test() {
-        xorQueries(new int[]{1, 3, 4, 8},new int[][]{{0,1},{1,2},{0,3},{3,3}});
+        xorQueries(new int[]{1, 3, 4, 8}, new int[][]{{0, 1}, {1, 2}, {0, 3}, {3, 3}});
     }
 
     int gcd(int x, int y) {
@@ -3125,80 +3132,84 @@ public class LeetCodeTest {
                     " double(10,3);");
         }
     }
+
     public int longestCommonSubsequence(String text1, String text2) {
-        int n=text1.length(),m=text2.length();
-        int[][] dp=new int[n+1][m+1];
+        int n = text1.length(), m = text2.length();
+        int[][] dp = new int[n + 1][m + 1];
         for (int i = 1; i <= n; i++) {
             for (int j = 1; j <= m; j++) {
-                if (text1.charAt(i-1)==text2.charAt(j-1))dp[i][j]=dp[i-1][j-1]+1;
-                else dp[i][j]=Math.max(dp[i-1][j],dp[i][j-1]);
+                if (text1.charAt(i - 1) == text2.charAt(j - 1)) dp[i][j] = dp[i - 1][j - 1] + 1;
+                else dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
             }
         }
         return dp[n][m];
     }
+
     public List<Integer> findSubstring(String s, String[] words) {
-        int n=words.length,m=words[0].length(),l=s.length();
-        List<Integer> res=new ArrayList<>();
-        Map<String,Integer> map =new HashMap<>();
+        int n = words.length, m = words[0].length(), l = s.length();
+        List<Integer> res = new ArrayList<>();
+        Map<String, Integer> map = new HashMap<>();
         for (String word : words) {
-            map.put(word,map.getOrDefault(word,0)+1);
+            map.put(word, map.getOrDefault(word, 0) + 1);
         }
-        Map<String,Integer> cur =new HashMap<>();
-        for (int i = 0,j=0; i+n*m <=l; i+=m) {
-            while (j<l&&j-i+1<=n*m){
-                String sub=s.substring(j,j+m);
-                cur.put(sub,cur.getOrDefault(sub,0)+1);
-                j+=m;
+        Map<String, Integer> cur = new HashMap<>();
+        for (int i = 0, j = 0; i + n * m <= l; i += m) {
+            while (j < l && j - i + 1 <= n * m) {
+                String sub = s.substring(j, j + m);
+                cur.put(sub, cur.getOrDefault(sub, 0) + 1);
+                j += m;
             }
             if (cur.equals(map)) res.add(i);
-            String per=s.substring(i,i+m);
-            if (cur.get(per)==1) cur.remove(per);
-            else cur.put(per,cur.get(per)-1);
+            String per = s.substring(i, i + m);
+            if (cur.get(per) == 1) cur.remove(per);
+            else cur.put(per, cur.get(per) - 1);
         }
         return res;
     }
+
     public int longestSubsequence(String s, int k) {
         String bs = Integer.toBinaryString(k);
-        int n=s.length(),m=bs.length(),cnt=n;
-        if (n<m) return cnt;
-        for (int i = 0; i <n-m; i++) {
-            cnt-=s.charAt(i)-'0';
+        int n = s.length(), m = bs.length(), cnt = n;
+        if (n < m) return cnt;
+        for (int i = 0; i < n - m; i++) {
+            cnt -= s.charAt(i) - '0';
         }
-        if (s.charAt(n-m)=='1'){
-            for (int i = n-m+1; i <n ; i++) {
+        if (s.charAt(n - m) == '1') {
+            for (int i = n - m + 1; i < n; i++) {
                 int f = s.charAt(i) - bs.charAt(i - n + m);
-                if (f >0){
+                if (f > 0) {
                     cnt--;
                     break;
-                }else if (f <0) break;
+                } else if (f < 0) break;
             }
         }
         return cnt;
     }
+
     public String largestTimeFromDigits(int[] arr) {
         Arrays.sort(arr);
-        int n=arr.length;
-        int[] res=new int[n];
-        for (int i = 3; i <=0; i--) {
-            Set<Integer> set =new HashSet<>();
-            res[0]=arr[i];
+        int n = arr.length;
+        int[] res = new int[n];
+        for (int i = 3; i <= 0; i--) {
+            Set<Integer> set = new HashSet<>();
+            res[0] = arr[i];
             set.add(i);
-            for (int j = 3; j <=0; j--) {
+            for (int j = 3; j <= 0; j--) {
                 if (set.contains(j)) continue;
                 set.add(j);
-                res[1]=arr[j];
-                for (int k = 3; k <=0; k--) {
+                res[1] = arr[j];
+                for (int k = 3; k <= 0; k--) {
                     if (set.contains(k)) continue;
                     set.add(k);
-                    res[2]=arr[k];
-                    for (int l = 3; l <=0; l--) {
-                        if(set.contains(l)) continue;
+                    res[2] = arr[k];
+                    for (int l = 3; l <= 0; l--) {
+                        if (set.contains(l)) continue;
                         set.add(l);
-                        res[3]=arr[l];
+                        res[3] = arr[l];
                     }
                 }
             }
-            if (isOK(res)){
+            if (isOK(res)) {
                 return new StringBuilder().append(res[0])
                         .append(res[1]).append(":").append(res[2]).append(res[3])
                         .toString();
@@ -3213,55 +3224,59 @@ public class LeetCodeTest {
                 && res[2] <= 6
                 && (res[2] != 6 || res[3] == 0);
     }
+
     public int findMaxForm(String[] strs, int m, int n) {
         //m:0,n:1;
-        int[][]dp=new int[m+1][n+1];
-        int l=strs.length;
+        int[][] dp = new int[m + 1][n + 1];
+        int l = strs.length;
         for (String str : strs) {
             int[] res = cnt(str);
             int a = res[0], b = res[1];
             for (int j = m; j >= a; j--) {
                 for (int k = n; k >= b; k--) {
-                    dp[j][k] = Math.max(dp[j][k], dp[j-a][k - b] + 1);
+                    dp[j][k] = Math.max(dp[j][k], dp[j - a][k - b] + 1);
                 }
             }
         }
         return dp[m][n];
     }
-    int[] cnt(String str){
-        int m=0,n=0;
+
+    int[] cnt(String str) {
+        int m = 0, n = 0;
         char[] chars = str.toCharArray();
         for (char aChar : chars) {
-            if (aChar=='0')m++;
+            if (aChar == '0') m++;
             else n++;
         }
-        return new int[]{m,n};
+        return new int[]{m, n};
     }
+
     public void wiggleSort(int[] nums) {
         int[] clone = nums.clone();
-        int n= nums.length;
-        int t=n-1;
-        for (int i = 1; i < n; i+=2) {
-            nums[i]=clone[t--];
+        int n = nums.length;
+        int t = n - 1;
+        for (int i = 1; i < n; i += 2) {
+            nums[i] = clone[t--];
         }
-        for (int i=0;i<n;i+=2){
-            nums[i]=clone[t--];
+        for (int i = 0; i < n; i += 2) {
+            nums[i] = clone[t--];
         }
     }
+
     public int numWays(int n, int[][] relation, int k) {
-        List<Integer>[] lists=new List[n];
-        int count=0;
+        List<Integer>[] lists = new List[n];
+        int count = 0;
         for (int i = 0; i < n; i++) {
-            lists[i]=new ArrayList<>();
+            lists[i] = new ArrayList<>();
         }
-        Deque<Integer> deque =new ArrayDeque<>();
+        Deque<Integer> deque = new ArrayDeque<>();
         for (int[] ints : relation) {
             lists[ints[0]].add(ints[1]);
         }
         deque.add(0);
-        while (!deque.isEmpty()&&k>0){
+        while (!deque.isEmpty() && k > 0) {
             k--;
-            int size=deque.size();
+            int size = deque.size();
             for (int i = 0; i < size; i++) {
                 Integer pop = deque.poll();
                 for (Integer o : lists[pop]) {
@@ -3269,64 +3284,195 @@ public class LeetCodeTest {
                 }
             }
         }
-        while (!deque.isEmpty()){
-            if (deque.pop()==n-1) count++;
+        while (!deque.isEmpty()) {
+            if (deque.pop() == n - 1) count++;
         }
         return count;
     }
+
     public int jump(int[] nums) {
-        int max=nums[0],n=nums.length,cnt=1,l=0;
-        while (max<n-1){
+        int max = nums[0], n = nums.length, cnt = 1, l = 0;
+        while (max < n - 1) {
             cnt++;
-            int t=max;
-            for (int i = l+1; i <=t ; i++) {
-                max=Math.max(i+nums[i],max);
+            int t = max;
+            for (int i = l + 1; i <= t; i++) {
+                max = Math.max(i + nums[i], max);
             }
-            l=t;
+            l = t;
         }
         return cnt;
     }
+
     public boolean canCross(int[] stones) {
-        int n=stones.length;
-        boolean [][] dp=new boolean[n][n];
-        boolean res=false;
-        dp[0][0]=true;
+        int n = stones.length;
+        boolean[][] dp = new boolean[n][n];
+        boolean res = false;
+        dp[0][0] = true;
         for (int i = 1; i < n; i++) {
             for (int j = 0; j < i; j++) {
-                int d=stones[i]-stones[j];
-                if (d>n-1) continue;
-                dp[i][d]=dp[i][d]||dp[j][d+1]||dp[j][d-1]|| dp[j][d];
+                int d = stones[i] - stones[j];
+                if (d > n - 1) continue;
+                dp[i][d] = dp[i][d] || dp[j][d + 1] || dp[j][d - 1] || dp[j][d];
             }
         }
         for (int i = 0; i < n; i++) {
-            res=res||dp[n-1][i];
+            res = res || dp[n - 1][i];
         }
         return res;
     }
+
     public int numDistinct(String s, String t) {
-        int n=s.length(),m=t.length();
-        int[][]dp=new int[m+1][n+1];
+        int n = s.length(), m = t.length();
+        int[][] dp = new int[m + 1][n + 1];
         for (int i = 1; i <= m; i++) {
             for (int j = 1; j <= n; j++) {
-                if (t.charAt(i-1)==s.charAt(j-1)){
-                    dp[i][j]=dp[i][j-1]+dp[i-1][j-1];
-                    dp[i][j]=Math.max(dp[i][j],1);
+                if (t.charAt(i - 1) == s.charAt(j - 1)) {
+                    dp[i][j] = dp[i][j - 1] + dp[i - 1][j - 1];
+                    dp[i][j] = Math.max(dp[i][j], 1);
                 }
             }
         }
         return dp[m][n];
     }
 
+    public int maxEvents(int[][] events) {
+        int cnt = 0, i = 0, begin = 1, n = events.length;
+        Arrays.sort(events, Comparator.comparingInt(a -> a[0]));
+        PriorityQueue<Integer> pq = new PriorityQueue<>(Comparator.comparingInt(a -> a));
+        while (i < n || !pq.isEmpty()) {
+            while (!pq.isEmpty() && pq.peek() < begin) pq.poll();
+            while (i < n && events[i][0] <= begin) {
+                pq.add(events[i][1]);
+                i++;
+            }
+            if (!pq.isEmpty()) {
+                pq.poll();
+                cnt++;
+            }
+            begin++;
+        }
+        return cnt;
+    }
+
+    public int maxValue(int[][] events, int k) {
+        Arrays.sort(events, (a, b) -> a[1] - b[1]);
+        int n = events.length;
+        //dp[i][j] 前i个会，参数k个的最大值
+        int[][] dp = new int[n + 1][k + 1];
+        for (int i = 1; i <= n; i++) {
+            int l = 1, r = i - 1, t = events[i - 1][1];
+            while (l <= r) {
+                int m = l + (r - l >> 1), cur = events[m - 1][1];
+                if (cur >= t) r = m - 1;
+                else l = m + 1;
+            }
+            int index = r > 0 ? r : 0;
+            for (int j = 1; j <= k; j++) {
+                dp[i][j] = Math.max(dp[i - 1][j], dp[index][j - 1] + events[i - 1][2]);
+            }
+        }
+        return dp[n][k];
+    }
+
+    public List<Integer> diffWaysToCompute(String expression) {
+        int n = expression.length();
+        List<Integer> nums = new ArrayList<>();
+        List<Character> ops = new ArrayList<>();
+        List<Integer> res = new ArrayList<>();
+        int a = 0;
+        for (int i = 0; i < n; i++) {
+            char c = expression.charAt(i);
+            if (Character.isDigit(c)) {
+                a = a * 10 + c - '0';
+            } else {
+                nums.add(a);
+                a = 0;
+                ops.add(c);
+            }
+        }
+        nums.add(a);
+        int s = nums.size();
+        //dp[i][j] 区间[i,j] 结果数 dp[i,j]=dp[i,k]+dp[k+1,j] 枚举k;
+        List<Integer>[][] dp = new List[s][s];
+        for (int i = 0; i < s; i++) {
+            for (int j = 0; j < s; j++) {
+                dp[i][j] = new ArrayList<>();
+            }
+        }
+        for (int i = s - 1; i >= 0; i--) {
+            for (int j = i; j < s; j++) {
+                List<Integer> list = dp[i][j];
+                if (i == j) list.add(nums.get(i));
+                else {
+                    for (int k = i; k < j; k++) {
+                        List<Integer> one = dp[i][k];
+                        List<Integer> two = dp[k + 1][j];
+                        Character c = ops.get(k);
+                        for (Integer per : one) {
+                            for (Integer be : two) {
+                                int ans;
+                                if (c == '+') ans = per + be;
+                                else if (c == '-') ans = per - be;
+                                else ans = per * be;
+                                list.add(ans);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return dp[0][s - 1];
+    }
+
+    public int maxProfit02(int[] prices) {
+        int n = prices.length, INF = Integer.MIN_VALUE;
+        int[][][] dp = new int[n][2][3];
+        dp[0][1][0] = -prices[0];
+        for (int i = 1; i < n; i++) {
+            dp[i][0][1] = Math.max(dp[i - 1][0][1], dp[i - 1][1][0] + prices[i]);
+            dp[i][0][2] = Math.max(dp[i - 1][0][2], (dp[i - 1][1][1] == 0 ? INF : dp[i - 1][1][1]) + prices[i]);
+            dp[i][1][0] = Math.max(dp[i - 1][1][0], dp[i - 1][0][0] - prices[i]);
+            dp[i][1][1] = Math.max(dp[i - 1][1][1], dp[i - 1][0][1] - prices[i]);
+            dp[i][1][2] = Math.max(dp[i - 1][1][2], dp[i - 1][0][2] - prices[i]);
+        }
+        return Math.max(dp[n - 1][0][2], dp[n - 1][0][1]);
+    }
+    public int minRefuelStops(int target, int startFuel, int[][] stations) {
+        if (target<=startFuel) return 0;
+        int n=stations.length;
+        int begin=startFuel,cnt=0,d=begin;
+        PriorityQueue<int[]> pq=new PriorityQueue<>((a,b)->b[1]-a[1]);
+        for (int i = 0; i < n; i++) {
+            while (i<n && begin>=stations[i][0]){
+                pq.add(stations[i]);
+                i++;
+            }
+            while (!pq.isEmpty()&&pq.peek()[0]<begin){
+                pq.poll();
+            }
+            if (!pq.isEmpty()){
+                int x = pq.poll()[1];
+                d+= x;
+                cnt++;
+                begin=x;
+                if (d>=target) return cnt;
+            }
+        }
+        return -1;
+    }
     @Test
     public void sout2() {
-        int mod= (int) (1e9+7);
-        numDecodings("11");
+        minRefuelStops(100, 10,
+                new int[][] {{10,60},{20,30},{30,30},{60,40}});
     }
 
     int[][] tr = new int[2010][2];
+
     int lowbit(int x) {
         return x & -x;
     }
+
     int[] query(int x) {
         int len = 0, cnt = 0;
         for (int i = x; i > 0; i -= lowbit(i)) {
@@ -3339,6 +3485,7 @@ public class LeetCodeTest {
         }
         return new int[]{len, cnt};
     }
+
     void add(int x, int[] info) {
         for (int i = x; i <= n; i += lowbit(i)) {
             int len = tr[i][0], cnt = tr[i][1];
@@ -3348,9 +3495,11 @@ public class LeetCodeTest {
                 len = info[0];
                 cnt = info[1];
             }
-            tr[i][0] = len; tr[i][1] = cnt;
+            tr[i][0] = len;
+            tr[i][1] = cnt;
         }
     }
+
     public int findNumberOfLIS(int[] nums) {
         n = nums.length;
         // 离散化

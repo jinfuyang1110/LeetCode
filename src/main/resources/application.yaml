@@ -6,3 +6,7 @@ spring:
     password: 123456
 mybatis:
   mapper-locations: classpath*:sqlMap/base/*.xml,classpath*:sqlMap/*.xml
+jueJin:
+  check_in: https://api.juejin.cn/growth_api/v1/check_in
+  draw: https://api.juejin.cn/growth_api/v1/lottery/draw
+  dip_luck: https://api.juejin.cn/growth_api/v1/lottery_lucky/dip_lucky

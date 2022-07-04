@@ -2,10 +2,13 @@ package com.example.hellodocker.controller;
 
 import com.example.hellodocker.bean.User;
 import com.example.hellodocker.handler.Result;
+import com.example.hellodocker.service.JueJinService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
 
 
 /**
@@ -19,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 public class DockerController {
     @Value("${userName}")
     private String userName;
+    @Resource
+    private JueJinService jueJinService;
     @GetMapping("/docker")
     public String hello(){
         return userName;
@@ -27,5 +32,8 @@ public class DockerController {
     public Result<?> user(@Validated @RequestBody  User user){
         return Result.success(user);
     }
-
+    @GetMapping("/do")
+    public String doIt(){
+        return jueJinService.check();
+    }
 }
