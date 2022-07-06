@@ -1,0 +1,24 @@
+class Solution {
+    public int getMoneyAmount(int n) {
+       //dp[i][j] 为[i,j]必中的最小花费
+        //dp[i][j]=min(dp[i][k-1]+dp[k+1][j])+k,枚举k
+       int[][]dp=new int[n+1][n+1];
+        for (int i = n; i >0; i--) {
+            for (int j = i; j <= n; j++) {
+                if (j-i==1){
+                    dp[i][j]= i;
+                    continue;
+                }
+                int min=Integer.MAX_VALUE;
+                for (int k=i+1;k<j;k++){
+                    min=Math.min(min, Math.max(dp[i][k-1],dp[k+1][j])+k);
+                }
+                if (min!=Integer.MAX_VALUE) dp[i][j]=min;
+            }
+        }
+        return dp[1][n];
+    }
+}
+
+//runtime:15 ms
+//memory:40.8 MB

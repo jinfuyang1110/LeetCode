@@ -3438,33 +3438,139 @@ public class LeetCodeTest {
         }
         return Math.max(dp[n - 1][0][2], dp[n - 1][0][1]);
     }
+
     public int minRefuelStops(int target, int startFuel, int[][] stations) {
-        if (target<=startFuel) return 0;
-        int n=stations.length;
-        int begin=startFuel,cnt=0,d=begin;
-        PriorityQueue<int[]> pq=new PriorityQueue<>((a,b)->b[1]-a[1]);
+        if (target <= startFuel) return 0;
+        int n = stations.length;
+        int begin = startFuel, cnt = 0, d = begin;
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> b[1] - a[1]);
         for (int i = 0; i < n; i++) {
-            while (i<n && begin>=stations[i][0]){
+            while (i < n && begin >= stations[i][0]) {
                 pq.add(stations[i]);
                 i++;
             }
-            while (!pq.isEmpty()&&pq.peek()[0]<begin){
+            while (!pq.isEmpty() && pq.peek()[0] < begin) {
                 pq.poll();
             }
-            if (!pq.isEmpty()){
+            if (!pq.isEmpty()) {
                 int x = pq.poll()[1];
-                d+= x;
+                d += x;
                 cnt++;
-                begin=x;
-                if (d>=target) return cnt;
+                begin = x;
+                if (d >= target) return cnt;
             }
         }
         return -1;
     }
+
+    public List<String> wordBreak(String s, List<String> wordDict) {
+        int n = s.length();
+        List<String>[] dp = new List[n + 1];
+        boolean[] b = new boolean[n + 1];
+        b[0] = true;
+        for (int i = 0; i <= n; i++) {
+            dp[i] = new ArrayList<>();
+        }
+        dp[0].add(" ");
+        Set<String> set = new HashSet<>(wordDict);
+        for (int i = 1; i <= n; i++) {
+            for (int j = 0; j < i; j++) {
+                String sb = s.substring(j, i);
+                if (b[j] && set.contains(sb)) {
+                    b[i] = true;
+                    dp[i].add(String.join(" ", dp[j]));
+                }
+            }
+        }
+        return dp[n];
+    }
+
+    public int integerReplacement(int n) {
+        int cnt = 0;
+        if (n == Integer.MAX_VALUE) {
+            cnt += 2;
+            n /= 2;
+        }
+        while (n != 1) {
+            if ((n & 1) == 0) n /= 2;
+            else {
+                if (isOK(n + 1)) n += 1;
+                else n -= 1;
+            }
+            cnt++;
+        }
+        return cnt;
+    }
+
+    boolean isOK(int x) {
+        while ((x & 1) == 0) {
+            x >>= 1;
+        }
+        return x == 1;
+    }
+    public int[][] bicycleYard(int[] position, int[][] terrain, int[][] obstacle) {
+        int m=terrain.length,n=terrain[0].length;
+        int[][]dirs={{1,0},{-1,0},{0,1},{0,-1}};
+        boolean[][][] visited=new boolean[m][n][101];
+        visited[position[0]][position[1]][1]=true;
+        Deque<int[]> deque=new ArrayDeque<>();
+        deque.add(new int[]{position[0],position[1],1});
+        while (!deque.isEmpty()){
+            int[] cur = deque.pop();
+            for (int[] dir : dirs) {
+                int x=cur[0]+dir[0];
+                int y=cur[1]+dir[1];
+                if (x>=0&&x<m&&y>=0&&y<n){
+                    int s=cur[2]+terrain[cur[0]][cur[1]]-terrain[x][y]-obstacle[x][y];
+                    if (s>0&&!visited[x][y][s]){
+                        visited[x][y][s]=true;
+                        deque.add(new int[]{x,y,s});
+                    }
+                }
+            }
+        }
+        visited[position[0]][position[1]][1]=false;
+        List<int[]> list=new ArrayList<>();
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (visited[i][j][1]) list.add(new int[]{i,j});
+            }
+        }
+        int[][]res=new int[list.size()][];
+        for (int i = 0; i < list.size(); i++) {
+            res[i]=list.get(i);
+        }
+        return res;
+    }
+    public String largestNumber(int[] cost, int target) {
+        int[] dp=new int[target+1];
+        //完全背包(严格等于所以初始化),先算长度，后贪心数字大小
+        Arrays.fill(dp,Integer.MIN_VALUE);
+        dp[0]=0;
+        for (int k : cost) {
+            for (int j = k; j <= target; j++) {
+                dp[j] = Math.max(dp[j], dp[j - k] + 1);
+            }
+        }
+        if (dp[target]<0) return "0";
+        StringBuilder sb=new StringBuilder();
+        for (int i=9,j=target;i>=1;i--){
+            int c=cost[i-1];
+            while (j>=c&&dp[j]==dp[j-c]+1){
+                sb.append(i);
+                j-=c;
+            }
+        }
+        return sb.toString();
+    }
     @Test
     public void sout2() {
-        minRefuelStops(100, 10,
-                new int[][] {{10,60},{20,30},{30,30},{60,40}});
+        int[] b = {1};
+        int[]a= {1};
+      Map<int[],Integer> map=new HashMap<>();
+      map.put(a,10);
+
+        System.out.println(map.get(b));
     }
 
     int[][] tr = new int[2010][2];

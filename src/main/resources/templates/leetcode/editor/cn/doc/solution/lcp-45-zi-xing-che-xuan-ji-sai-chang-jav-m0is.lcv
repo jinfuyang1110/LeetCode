@@ -1,0 +1,72 @@
+### 解题思路
+
+在每一个位置尝试各种速度开始，接下来达到的位置速度是1并且没加过答案的情况下，添加到答案中。
+
+1. 添加过答案的位置，不再添加`adds`记录
+2. 位置尝试初始速度信息`indexs`
+
+### 代码
+
+* java
+
+```java
+class Solution {
+	int[][] terrain;
+	int[][] obstacle;
+	int m, n;
+	int[] d = new int[] { 0, -1, 0, 1, -1, 0, 1, 0 };
+
+	public int[][] bicycleYard(int[] position, int[][] terrain, int[][] obstacle) {
+		this.terrain = terrain;
+		this.obstacle = obstacle;
+		m = obstacle.length;
+		n = obstacle[0].length;
+		List<int[]> ret = new ArrayList<>();// 答案
+		int arraySize = m * n;
+		Set<Integer>[] indexs = new HashSet[arraySize];// 以某一个速度在这个位置开始。
+		for (int i = 0; i < arraySize; i++) {
+			indexs[i] = new HashSet<>();
+		}
+		int start = this.index(position[0], position[1], n);// 起始位置
+		indexs[start].add(1);// 起始位置，速度1开始尝试过了
+		boolean[] adds = new boolean[arraySize];// 添加过答案
+		adds[start] = true;// 看例子，起始位置不算
+		// 以1的速度从x,y位置开始，产生的可以达到速度1的位置，如果没加入过的ret就加入ret，indexs记录
+		this.bicycleYard(1, position[0], position[1], ret, indexs, adds);
+		int[][] ans = new int[ret.size()][];
+		int p = 0;
+		for (int[] pos : ret) {
+			ans[p++] = pos;
+		}
+		Arrays.sort(ans, (a, b) -> a[0] == b[0] ? a[1] - b[1] : a[0] - b[0]);
+		return ans;
+	}
+
+	private void bicycleYard(int speed, int x, int y, List<int[]> ret, Set<Integer>[] indexs, boolean[] adds) {
+		// 骑行过程中速度不能为零或负值
+		for (int i = 0; i < 8; i += 2) {
+			int nextx = x + d[i], nexty = y + d[i + 1];
+			int nextIndex = this.index(nextx, nexty, n);
+			if (nextx >= 0 && nextx < m && nexty >= 0 && nexty < n) {
+				int nextSpeed = speed + terrain[x][y] - terrain[nextx][nexty] - obstacle[nextx][nexty];
+				if (nextSpeed > 0) {
+					if (nextSpeed == 1 && !adds[nextIndex]) {
+						adds[nextIndex] = true;
+						ret.add(new int[] { nextx, nexty });
+					}
+					Set<Integer> set = indexs[nextIndex];
+					if (!set.contains(nextSpeed)) {
+						set.add(nextSpeed);
+						this.bicycleYard(nextSpeed, nextx, nexty, ret, indexs, adds);
+					}
+				}
+			}
+		}
+	}
+
+	public int index(int i, int j, int n) {
+		return i * n + j;
+	}
+}
+```
+

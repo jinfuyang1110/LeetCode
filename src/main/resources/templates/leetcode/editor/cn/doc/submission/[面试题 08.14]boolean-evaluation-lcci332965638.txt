@@ -1,0 +1,45 @@
+class Solution {
+    Map<String,List<Integer>> map=new HashMap<>();
+    public int countEval(String s, int result) {
+        int n=s.length()-1;
+        int cnt=0;
+        List<Integer> res = g(0 + "," + n, s);
+        for (Integer re : res) {
+            if (re==result) cnt++;
+        }
+        return cnt;
+    }
+    List<Integer> g(String t,String s){
+        if (!map.containsKey(t)){
+            int l=Integer.parseInt(t.split(",")[0]);
+            int r=Integer.parseInt(t.split(",")[1]);
+            List<Integer>list=new ArrayList<>();
+            if (l==r)list.add(s.charAt(l)-'0');
+            for (int i = l; i < r; i+=2) {
+                List<Integer> before=g(l+","+i,s);
+                List<Integer> end=g((i+2)+","+r,s);
+                for (Integer a : before) {
+                    for (Integer b : end) {
+                        char c=s.charAt(i+1);
+                        if(c=='|') list.add(a|b);
+                        else if (c=='&')list.add(a&b);
+                        else list.add(a^b);
+                    }
+                }
+            }
+            map.put(l+","+r,list);
+        }
+        return map.get(t);
+    }
+}
+
+//runtime:N/A
+//memory:N/A
+//total_testcases:78
+//total_correct:68
+//input_formatted:"1^0&0&1&0^0^0|1^0&0&0|1&1^1&1|1^1&0|0&1"
+0
+//expected_output:843148335
+//code_output:
+//runtime_error:
+//last_testcase:"1^0&0&1&0^0^0|1^0&0&0|1&1^1&1|1^1&0|0&1" 0

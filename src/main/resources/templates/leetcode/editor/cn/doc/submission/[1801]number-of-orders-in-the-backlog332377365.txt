@@ -1,0 +1,52 @@
+class Solution {
+    public int getNumberOfBacklogOrders(int[][] orders) {
+        PriorityQueue<int[]> sell=new PriorityQueue<>((a,b)->(a[0]-b[0]));
+        PriorityQueue<int[]> buy=new PriorityQueue<>((a,b)->(b[0]-a[0]));
+        int cnt=0,mod=(int)1e9+7;
+        for (int[] order : orders) {
+            int type=order[2];
+            int price=order[0];
+            int count=order[1];
+            if (type==0){
+                while (!sell.isEmpty()&&sell.peek()[0]<=price&&count>0){
+                    int[] s = sell.poll();
+                    int diff=s[1]-count;
+                    if (diff>0){
+                      s[1]=diff;
+                      sell.add(s);
+                      count=0;
+                    }else if (diff<0){
+                        count-=s[1];
+                    }
+                }
+                if (count>0) buy.add(new int[]{price,count,type});
+            }else {
+                while (!buy.isEmpty()&&buy.peek()[0]>=price&&count>0){
+                    int[] b=buy.poll();
+                    int diff=b[1]-count;
+                    if (diff>0){
+                        b[1]=diff;
+                        buy.add(b);
+                        count=0;
+                    }else if (diff<0){
+                        count-=b[1];
+                    }
+                }
+                if (count>0) sell.add(new int[]{price,count,type});
+            }
+        }
+        while (!sell.isEmpty()){
+            cnt=(cnt+sell.poll()[1])%mod;
+        }
+        while (!buy.isEmpty()){
+            cnt=(cnt+buy.poll()[1])%mod;
+        }
+        return cnt;
+    }
+}
+
+//total_testcases:69
+//total_correct:67
+//input_formatted:[[23,8,0],[28,29,1],[11,30,1],[30,25,0],[26,9,0],[3,21,0],[28,19,1],[19,30,0],[20,9,1],[17,6,0]]
+//expected_output:102
+//code_output:111

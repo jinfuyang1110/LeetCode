@@ -66,10 +66,53 @@ package com.example.hellodocker.leetCode.leetcode.editor.cn;
 // Related Topics 数组 模拟 堆（优先队列） 👍 21 👎 0
 
 
+import java.util.PriorityQueue;
+
 //leetcode submit region begin(Prohibit modification and deletion)
 class Solution {
     public int getNumberOfBacklogOrders(int[][] orders) {
-
+        PriorityQueue<int[]> sell=new PriorityQueue<>((a,b)->(a[0]-b[0]));
+        PriorityQueue<int[]> buy=new PriorityQueue<>((a,b)->(b[0]-a[0]));
+        int cnt=0,mod=(int)1e9+7;
+        for (int[] order : orders) {
+            int type=order[2];
+            int price=order[0];
+            int count=order[1];
+            if (type==0){
+                while (!sell.isEmpty()&&sell.peek()[0]<=price&&count>0){
+                    int[] s = sell.poll();
+                    int diff=s[1]-count;
+                    if (diff>0){
+                      s[1]=diff;
+                      sell.add(s);
+                      count=0;
+                    }else if (diff<0){
+                        count-=s[1];
+                    }else count=0;
+                }
+                if (count>0) buy.add(new int[]{price,count,type});
+            }else {
+                while (!buy.isEmpty()&&buy.peek()[0]>=price&&count>0){
+                    int[] b=buy.poll();
+                    int diff=b[1]-count;
+                    if (diff>0){
+                        b[1]=diff;
+                        buy.add(b);
+                        count=0;
+                    }else if (diff<0){
+                        count-=b[1];
+                    }else count=0;
+                }
+                if (count>0) sell.add(new int[]{price,count,type});
+            }
+        }
+        while (!sell.isEmpty()){
+            cnt=(cnt+sell.poll()[1])%mod;
+        }
+        while (!buy.isEmpty()){
+            cnt=(cnt+buy.poll()[1])%mod;
+        }
+        return cnt;
     }
 }
 //leetcode submit region end(Prohibit modification and deletion)
