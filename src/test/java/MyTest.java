@@ -180,12 +180,65 @@ public class MyTest {
             chars[i]=temp;
         }
     }
+    public boolean canReceiveAllSignals(int[][] intervals) {
+        Arrays.sort(intervals, Comparator.comparingInt(a -> a[0]));
+       int n=intervals.length;
+        for (int i = 1; i < n; i++) {
+            if (intervals[i][0]<intervals[i-1][1]) return false;
+        }
+        return true;
+    }
+    public int buildTransferStation(int[][] area) {
+        int m=area.length,n=area[0].length;
+        int min=Integer.MAX_VALUE;
+        List<int[]> aims=new ArrayList<>();
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (area[i][j]==1)aims.add(new int[]{i,j});
+            }
+        }
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                min=Math.min(min,getMin(aims,i,j));
+            }
+        }
+        return min;
+    }
+    int getMin(List<int[]>aims,int x,int y){
+        int cost=0;
+        for (int[] aim : aims) {
+            cost+=Math.abs(x-aim[0])+Math.abs(y-aim[1]);
+        }
+        return cost;
+    }
+    public int minSwaps(int[] chess) {
+        //前缀和加滑动窗口
+        int ans=Integer.MAX_VALUE,n=chess.length;
+       int[] sum=new int[n+1];
+        for (int i = 1; i <= n; i++) {
+            sum[i]=sum[i-1]+chess[i-1];
+        }
+        for (int i = 0; i+sum[n] <= n; i++) {
+            ans=Math.min(ans,sum[n]-sum[i+sum[n]]-sum[i]);
+        }
+        return ans;
+    }
+    int ans=Integer.MAX_VALUE;
+    public int minTransfers(int[][] distributions) {
+        int[] records=new int[12];
+        for (int[] distribution : distributions) {
+            records[distribution[0]]-=distribution[2];
+            records[distribution[1]]+=distribution[2];
+        }
+        dfs(0,0,records);
+        return ans;
+    }
+    void dfs(int start,int cnt,int[]records){
 
+    }
     @Test
     public void test() {
-        String[] s = {"hot", "dot", "dog", "lot", "log", "cog"};
-        ladderLength("hit",
-                "cog", new ArrayList<>(Arrays.asList(s)));
+      minSwaps(new int[]{1,0,1,0,1,0,0,1,1,0,1});
     }
 
     public String replaceWords(List<String> dictionary, String sentence) {
