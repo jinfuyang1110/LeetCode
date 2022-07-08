@@ -44,10 +44,30 @@ package com.example.hellodocker.leetCode.leetcode.editor.cn;
 // Related Topics 数组 动态规划 👍 247 👎 0
 
 
+import java.util.Arrays;
+
 //leetcode submit region begin(Prohibit modification and deletion)
 class Solution {
     public int profitableSchemes(int n, int minProfit, int[] group, int[] profit) {
-
+        int mod = (int) 1e9 + 7;
+        int cnt = 0;
+        int m = group.length;
+        //dp[i][j]:i个人创造j的总利润
+        int[][] dp = new int[n + 1][minProfit + 1];
+        for (int i = 0; i <= n; i++) {
+            dp[i][0]=1;
+        }
+        for (int i = 0; i < m; i++) {
+            int num = group[i];
+            int now = profit[i];
+            for (int j = n; j >= num; j--) {
+                for (int k = minProfit; k >= 0; k--) {
+                    int cur=Math.max(0,k-now);
+                    dp[j][k] = (dp[j][k] + dp[j - num][cur]) % mod;
+                }
+            }
+        }
+        return dp[n][minProfit];
     }
 }
 //leetcode submit region end(Prohibit modification and deletion)

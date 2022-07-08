@@ -1,0 +1,43 @@
+class Solution {
+    public int profitableSchemes(int n, int minProfit, int[] group, int[] profit) {
+        int mod = (int) 1e9 + 7;
+        int cnt = 0;
+        int m = group.length;
+        int[] p = new int[n + 1];
+        for (int i = 0; i < m; i++) {
+            int num = group[i];
+            for (int j = n; j >= num; j--) {
+                p[j] = Math.max(p[j], p[j - num] + profit[i]);
+            }
+        }
+        int maxP = p[n];
+//        System.out.println(maxP);
+        //dp[i][j]:i个人创造j的总利润
+        int[][] dp = new int[n + 1][maxP + 1];
+        dp[0][0] = 1;
+        for (int i = 0; i < m; i++) {
+            int num = group[i];
+            int now = profit[i];
+            for (int j = n; j >= num; j--) {
+                for (int k = now; k <= maxP; k++) {
+                    dp[j][k] = (dp[j][k] + dp[j - num][k - now]) % mod;
+                }
+            }
+        }
+        for (int i = 1; i <= n; i++) {
+            for (int j = minProfit; j <= maxP; j++) {
+                cnt = (cnt + dp[i][j]) % mod;
+            }
+        }
+        return cnt;
+    }
+}
+
+//total_testcases:45
+//total_correct:44
+//input_formatted:64
+0
+[80, 40]
+[88, 88]
+//expected_output:2
+//code_output:1

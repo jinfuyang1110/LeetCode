@@ -1,0 +1,83 @@
+# 解法
+
+## 思路和算法
+
+由于一次蛙鸣包含 $5$ 个字母，如果 $\textit{croakOfFrogs}$ 是有效的蛙鸣组合，其长度一定是 $5$ 的倍数。如果 $\textit{croakOfFrogs}$ 的长度不是 $5$ 的倍数，则一定不是有效的蛙鸣组合，返回 $-1$。
+
+有效的蛙鸣组合中，每个蛙鸣包含的 $5$ 个字母必须是有序的，可以通过对每个字母计数的方式判断是否为有效的蛙鸣组合和计算青蛙的数目。
+
+如果 $\textit{croakOfFrogs}$ 是有效的蛙鸣组合，则对于每个不是 $\text{`c'}$ 的字母，蛙鸣中的上一个字母一定在 $\textit{croakOfFrogs}$ 中已经出现。例如，当 $\textit{croakOfFrogs}$ 中存在字母 $\text{`r'}$ 时，一定在字母 $\text{`r'}$ 之前有字母 $\text{`c'}$。假设字母 $\text{`c', `r', `o', `a', `k'}$ 对应的下标分别是 $0, 1, 2, 3, 4$，则当遍历到下标为 $\textit{index}$ 的字母时，进行如下操作：
+
+- 当 $\textit{index} < 4$ 时，将下标 $\textit{index}$ 对应的计数加 $1$；
+
+- 当 $\textit{index} > 0$ 时，将下标 $\textit{index} - 1$ 对应的计数减 $1$，如果在更新计数之后，下标 $\textit{index} - 1$ 对应的计数变成负数，则 $\textit{croakOfFrogs}$ 不是有效的蛙鸣组合，返回 $-1$；
+
+- 遍历结束之后，对于有效的蛙鸣组合，每个下标对应的计数都应该是 $0$，如果存在下标对应的计数不是 $0$，则返回 $-1$。
+
+为了计算所需不同青蛙的最少数目，需要在遍历过程中维护青蛙的数目。每次遍历到字母 $\text{`c'}$ 时将青蛙的数目加 $1$，表示开始一个新的蛙鸣，遍历到字母 $\text{`k'}$ 时将青蛙的数目减 $1$，表示一个蛙鸣的结束。遍历过程中维护青蛙数目的最大值，表示同时出现的蛙鸣数目的最大值，该数目即为所需不同青蛙的最少数目，如果青蛙数目少于该数目，则无法生成给定的蛙鸣组合。
+
+## 代码
+
+* [sol1-Java]
+
+```Java
+class Solution {
+    public int minNumberOfFrogs(String croakOfFrogs) {
+        int length = croakOfFrogs.length();
+        if (length % 5 != 0) {
+            return -1;
+        }
+        int curSize = 0, maxSize = 0;
+        int[] counts = new int[4];
+        for (int i = 0; i < length; i++) {
+            char c = croakOfFrogs.charAt(i);
+            int index = getIndex(c);
+            if (index == 0) {
+                counts[index]++;
+                curSize++;
+                maxSize = Math.max(maxSize, curSize);
+            } else {
+                counts[index - 1]--;
+                if (counts[index - 1] < 0) {
+                    return -1;
+                }
+                if (index < 4) {
+                    counts[index]++;
+                } else {
+                    curSize--;
+                }
+            }
+        }
+        for (int i = 0; i < 4; i++) {
+            if (counts[i] != 0) {
+                return -1;
+            }
+        }
+        return maxSize;
+    }
+
+    public int getIndex(char c) {
+        switch (c) {
+        case 'c':
+            return 0;
+        case 'r':
+            return 1;
+        case 'o':
+            return 2;
+        case 'a':
+            return 3;
+        case 'k':
+            return 4;
+        default:
+            return -1;
+        }
+    }
+}
+```
+
+## 复杂度分析
+
+- 时间复杂度：$O(n + |\Sigma|)$，其中 $n$ 是字符串 $\textit{croakOfFrogs}$ 的长度，$\Sigma$ 表示字符集，这道题中的字符集包含 $\text{`c', `r', `o', `a', `k'}$，$|\Sigma|=5$。需要遍历字符串 $\textit{croakOfFrogs}$ 一次，以及需要遍历每个字母的计数一次。
+
+- 空间复杂度：$O(|\Sigma|)$，其中 $\Sigma$ 表示字符集，这道题中的字符集包含 $\text{`c', `r', `o', `a', `k'}$，$|\Sigma|=5$。空间复杂度主要为对每个字符计数的空间。
+
